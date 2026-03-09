@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>جدولي</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="جدولي">
+  
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #818cf8;
+      --secondary: #06b6d4;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --holiday: #f97316;
+      --exam: #8b5cf6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --shadow-hover: 0 8px 30px rgba(79,70,229,0.15);
+    }
+    /* الكود المصلح للوضع الليلي */
+    body.dark-mode {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    body.dark-mode .stat-card,
+    body.dark-mode .legend,
+    body.dark-mode .progress-section,
+    body.dark-mode .filter-btn {
+      background: var(--card-bg) !important;
+      color: var(--text) !important;
+    }
+
+    /* ألوان البطاقات الخاصة في الوضع الليلي */
+    body.dark-mode .day-card.holiday-card {
+      background: linear-gradient(135deg, #7c2d12 0%, #92400e 100%) !important;
+      border-color: #fb923c !important;
+    }
+
+    body.dark-mode .day-card.exam-card {
+      background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 100%) !important;
+      border-color: #a855f7 !important;
+    }
+
+    /* ألوان التاغات (Tags) في الوضع الليلي لضمان الوضوح */
+    body.dark-mode .tag-moqawama { background: #1e3a8a; color: #93c5fd; }
+    body.dark-mode .tag-dynamics { background: #064e3b; color: #6ee7b7; }
+    body.dark-mode .tag-thermal { background: #7f1d1d; color: #fca5a5; }
+    body.dark-mode .tag-programming { background: #831843; color: #f472b6; }
+    body.dark-mode .tag-diff { background: #78350f; color: #fcd34d; }
+    body.dark-mode .tag-english { background: #3730a3; color: #a5b4fc; }
+    body.dark-mode .tag-review { background: #374151; color: #d1d5db; }
+    body.dark-mode .tag-exam { background: #5b21b6; color: #d8b4fe; }
+    body.dark-mode .tag-holiday { background: #7c2d12; color: #fdba74; }
+
+    /* أيقونات المواد في الوضع الليلي */
+    body.dark-mode .icon-moqawama { background: #1e3a8a; }
+    body.dark-mode .icon-dynamics { background: #064e3b; }
+    body.dark-mode .icon-thermal { background: #7f1d1d; }
+    body.dark-mode .icon-programming { background: #831843; }
+    body.dark-mode .icon-diff { background: #78350f; }
+    body.dark-mode .icon-english { background: #3730a3; }
+    body.dark-mode .icon-review { background: #374151; }
+    body.dark-mode .icon-exam { background: #5b21b6; }
+
+    body.dark-mode .holiday-text { color: #fdba74 !important; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    #splash-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #4f46e5;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      z-index: 10000;
+      transition: opacity 0.5s ease-out;
+    }
+    body.dark-mode #splash-screen { background: #0f172a; }
+    .loading-text { color: white; font-family: 'Cairo', sans-serif; margin-top: 15px; }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%);
+      padding: 40px 20px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    .header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: #fff;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .header p {
+      color: rgba(255,255,255,0.85);
+      font-size: 1rem;
+      margin-top: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .header-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 20px;
+      margin-top: -30px;
+      position: relative;
+      z-index: 10;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 14px 22px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      min-width: 120px;
+      border-top: 3px solid var(--primary);
+      transition: transform 0.2s;
+    }
+    
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card.holiday { border-top-color: var(--holiday); }
+    .stat-card.exam { border-top-color: var(--exam); }
+    .stat-card.success { border-top-color: var(--success); }
+    .stat-num {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .stat-card.holiday .stat-num { color: var(--holiday); }
+    .stat-card.exam .stat-num { color: var(--exam); }
+    .stat-card.success .stat-num { color: var(--success); }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Filter tabs */
+    .filter-section {
+      padding: 10px 20px 0;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 2px solid var(--border);
+      background: white;
+      cursor: pointer;
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+    }
+
+    /* Main container */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Week section */
+    .week-section {
+      margin-bottom: 30px;
+    }
+    .week-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 12px;
+      color: white;
+    }
+    .week-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .week-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+
+    /* Day card */
+    .day-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .day-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    .day-card.holiday-card {
+      background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+      border-color: #fb923c;
+    }
+    .day-card.exam-card {
+      background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%);
+      border-color: #a855f7;
+    }
+    .day-card.completed {
+      opacity: 0.6;
+      border: 2px solid var(--success) !important;
+      position: relative;
+    }
+    .day-card.completed::after {
+      content: '✓';
+      position: absolute; top: 10px; left: 10px;
+      background: var(--success); color: white;
+      width: 25px; height: 25px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    
+
+    .day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+    }
+    .day-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .day-number {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .holiday-card .day-number { background: linear-gradient(135deg, #f97316, #fb923c); }
+    .exam-card .day-number { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+
+    .day-name-date {
+      display: flex;
+      flex-direction: column;
+    }
+    .day-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .day-date {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .day-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .tag {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .tag-moqawama { background: #dbeafe; color: #1d4ed8; }
+    .tag-dynamics { background: #d1fae5; color: #065f46; }
+    .tag-thermal { background: #fee2e2; color: #991b1b; }
+    .tag-programming { background: #fce7f3; color: #9d174d; }
+    .tag-diff { background: #fef3c7; color: #92400e; }
+    .tag-english { background: #e0e7ff; color: #3730a3; }
+    .tag-review { background: #f3f4f6; color: #374151; }
+    .tag-exam { background: #ede9fe; color: #5b21b6; }
+    .tag-holiday { background: #fff7ed; color: #c2410c; }
+
+    /* Day tasks */
+    .day-tasks {
+      padding: 0 18px 14px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .day-tasks.open { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .task-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 12px;
+    }
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .task-item:last-child { border-bottom: none; }
+    .task-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .icon-moqawama { background: #dbeafe; }
+    .icon-dynamics { background: #d1fae5; }
+    .icon-thermal { background: #fee2e2; }
+    .icon-programming { background: #fce7f3; }
+    .icon-diff { background: #fef3c7; }
+    .icon-english { background: #e0e7ff; }
+    .icon-review { background: #f3f4f6; }
+    .icon-exam { background: #ede9fe; }
+
+    .task-content { flex: 1; }
+    .task-subject {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .task-detail {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .task-time {
+      font-size: 0.78rem;
+      color: var(--exam);
+      font-weight: 600;
+      background: #ede9fe;
+      padding: 2px 8px;
+      border-radius: 8px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    /* Holiday special */
+    .holiday-content {
+      padding: 20px 18px;
+      text-align: center;
+    }
+    .holiday-emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+    .holiday-text {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #c2410c;
+    }
+    .holiday-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Expand arrow */
+    .expand-arrow {
+      transition: transform 0.3s;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .day-card.expanded .expand-arrow { transform: rotate(180deg); }
+
+    /* Legend */
+    .legend {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .legend h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Progress bar */
+    .progress-section {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .progress-section h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .progress-item {
+      margin-bottom: 12px;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 1s ease;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .day-tags { display: none; }
+      .stats-bar { gap: 8px; }
+      .stat-card { min-width: 90px; padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+<div id="splash-screen">
+    <div style="font-size: 50px;">📝</div>
+    <div class="loading-text">جاري التهيئة...</div>
+</div>
+<button class="dark-mode-toggle" onclick="toggleDarkMode()" title="تبديل الوضع الليلي">☀️</button>
+
+<div class="header">
+  <span class="header-icon">📚</span>
+  <h1>جدول مذاكرة اختبارات الميد</h1>
+  <p>الجدول المعدل — يبدأ من الأحد ٨ مارس ٢٠٢٥</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="stat-num">22</div>
+    <div class="stat-label">يوم دراسي</div>
+  </div>
+  <div class="stat-card holiday">
+    <div class="stat-num">3</div>
+    <div class="stat-label">أيام إجازة عيد</div>
+  </div>
+  <div class="stat-card exam">
+    <div class="stat-num">6</div>
+    <div class="stat-label">اختبارات</div>
+  </div>
+  <div class="stat-card success">
+    <div class="stat-num">6</div>
+    <div class="stat-label">مواد</div>
+  </div>
+</div>
+
+<div class="filter-section">
+  <button class="filter-btn active" onclick="filterWeek('all', this)">الكل</button>
+  <button class="filter-btn" onclick="filterWeek('week1', this)">الأسبوع الأول</button>
+  <button class="filter-btn" onclick="filterWeek('week2', this)">الأسبوع الثاني</button>
+  <button class="filter-btn" onclick="filterWeek('week3', this)">الأسبوع الثالث</button>
+  <button class="filter-btn" onclick="filterWeek('week4', this)">الاختبارات</button>
+</div>
+
+<div class="container">
+
+  <!-- Legend -->
+  <div class="legend">
+    <h3>🗂️ دليل المواد</h3>
+    <div class="legend-grid">
+      <div class="legend-item"><div class="legend-dot" style="background:#1d4ed8"></div> مقاومة مواد</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#065f46"></div> ديناميكا</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#991b1b"></div> ديناميكا حرارية</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9d174d"></div> برمجة</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#92400e"></div> معادلات تفاضلية</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3730a3"></div> لغة إنجليزية</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#374151"></div> مراجعة</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c2410c"></div> إجازة عيد الفطر</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-section">
+    <h3>📊 توزيع المهام حسب المادة</h3>
+    <div class="progress-item">
+      <div class="progress-label"><span>مقاومة مواد</span><span>10 أيام</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%;background:linear-gradient(90deg,#1d4ed8,#3b82f6)"></div></div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label"><span>ديناميكا</span><span>10 أيام</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%;background:linear-gradient(90deg,#065f46,#34d399)"></div></div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label"><span>ديناميكا حرارية</span><span>9 أيام</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:90%;background:linear-gradient(90deg,#991b1b,#ef4444)"></div></div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label"><span>برمجة</span><span>9 أيام</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:90%;background:linear-gradient(90deg,#9d174d,#ec4899)"></div></div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label"><span>معادلات تفاضلية</span><span>10 أيام</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%;background:linear-gradient(90deg,#92400e,#f59e0b)"></div></div>
+    </div>
+    <div class="progress-item">
+      <div class="progress-label"><span>لغة إنجليزية</span><span>5 أيام</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:50%;background:linear-gradient(90deg,#3730a3,#818cf8)"></div></div>
+    </div>
+  </div>
+
+  <!-- Week 1 -->
+  <div class="week-section" data-week="week1">
+    <div class="week-header">
+      <h2>🗓️ الأسبوع الأول</h2>
+      <span class="week-badge">8 - 14 مارس</span>
+    </div>
+
+    <!-- Day 1: Sunday March 8 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">8</div>
+          <div class="day-name-date">
+            <span class="day-name">الأحد</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-dynamics">ديناميكا</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-dynamics">🔄</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا</div>
+            <div class="task-detail">الفصل 12 — نصف الأسئلة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2: Monday March 9 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">9</div>
+          <div class="day-name-date">
+            <span class="day-name">الاثنين</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-moqawama">مقاومة مواد</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-moqawama">⚙️</div>
+          <div class="task-content">
+            <div class="task-subject">مقاومة مواد</div>
+            <div class="task-detail">الفصل الأول — كامل</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 3: Tuesday March 10 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">10</div>
+          <div class="day-name-date">
+            <span class="day-name">الثلاثاء</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-moqawama">مقاومة مواد</span>
+          <span class="tag tag-dynamics">ديناميكا</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-moqawama">⚙️</div>
+          <div class="task-content">
+            <div class="task-subject">مقاومة مواد</div>
+            <div class="task-detail">الفصل الثاني — نصف + نظري</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-dynamics">🔄</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا</div>
+            <div class="task-detail">الفصل 12 — تكملة باقي الأسئلة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 4: Wednesday March 11 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">11</div>
+          <div class="day-name-date">
+            <span class="day-name">الأربعاء</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-moqawama">مقاومة مواد</span>
+          <span class="tag tag-dynamics">ديناميكا</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-moqawama">⚙️</div>
+          <div class="task-content">
+            <div class="task-subject">مقاومة مواد</div>
+            <div class="task-detail">الفصل الثاني — تكملة + نظري</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-dynamics">🔄</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا</div>
+            <div class="task-detail">الفصل 13 — كامل</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 5: Thursday March 12 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">12</div>
+          <div class="day-name-date">
+            <span class="day-name">الخميس</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-moqawama">مقاومة مواد</span>
+          <span class="tag tag-dynamics">ديناميكا</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-moqawama">⚙️</div>
+          <div class="task-content">
+            <div class="task-subject">مقاومة مواد</div>
+            <div class="task-detail">الفصل الثالث — نصف + نظري</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-dynamics">🔄</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا</div>
+            <div class="task-detail">الفصل 14 — نصف الأسئلة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 6: Friday March 13 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">13</div>
+          <div class="day-name-date">
+            <span class="day-name">الجمعة</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-moqawama">مقاومة مواد</span>
+          <span class="tag tag-dynamics">ديناميكا</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-moqawama">⚙️</div>
+          <div class="task-content">
+            <div class="task-subject">مقاومة مواد</div>
+            <div class="task-detail">الفصل الثالث — تكملة + نظري</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-dynamics">🔄</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا</div>
+            <div class="task-detail">الفصل 14 — تكملة الأسئلة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 7: Saturday March 14 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">14</div>
+          <div class="day-name-date">
+            <span class="day-name">السبت</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-thermal">ديناميكا حرارية</span>
+          <span class="tag tag-programming">برمجة</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا حرارية</div>
+            <div class="task-detail">الفصل الأول — نصف</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الأول — نصف</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week 2 -->
+  <div class="week-section" data-week="week2">
+    <div class="week-header" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">
+      <h2>🗓️ الأسبوع الثاني</h2>
+      <span class="week-badge">15 - 22 مارس</span>
+    </div>
+
+    <!-- Day 8: Sunday March 15 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">15</div>
+          <div class="day-name-date">
+            <span class="day-name">الأحد</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-thermal">ديناميكا حرارية</span>
+          <span class="tag tag-programming">برمجة</span>
+          <span class="tag tag-review">مراجعة د1</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا حرارية</div>
+            <div class="task-detail">الفصل الأول — تكملة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الأول — تكملة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-review">📖</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة (د1)</div>
+            <div class="task-detail">ديناميكا + مقاومة مواد</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 9: Monday March 16 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">16</div>
+          <div class="day-name-date">
+            <span class="day-name">الاثنين</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-thermal">ديناميكا حرارية</span>
+          <span class="tag tag-programming">برمجة</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا حرارية</div>
+            <div class="task-detail">الفصل الثاني — نصف</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الثاني — نصف</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 10: Tuesday March 17 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">17</div>
+          <div class="day-name-date">
+            <span class="day-name">الثلاثاء</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-thermal">ديناميكا حرارية</span>
+          <span class="tag tag-programming">برمجة</span>
+          <span class="tag tag-review">مراجعة د2</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا حرارية</div>
+            <div class="task-detail">الفصل الثاني — تكملة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الثاني — تكملة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-review">📖</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة (د2)</div>
+            <div class="task-detail">ديناميكا + مقاومة مواد</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 11: Wednesday March 18 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">18</div>
+          <div class="day-name-date">
+            <span class="day-name">الأربعاء</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-thermal">ديناميكا حرارية</span>
+          <span class="tag tag-programming">برمجة</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا حرارية</div>
+            <div class="task-detail">الفصل الثالث — نصف</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الثالث — نصف</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 12: Thursday March 19 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">19</div>
+          <div class="day-name-date">
+            <span class="day-name">الخميس</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-thermal">ديناميكا حرارية</span>
+          <span class="tag tag-programming">برمجة</span>
+          <span class="tag tag-review">مراجعة د3</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">ديناميكا حرارية</div>
+            <div class="task-detail">الفصل الثالث — تكملة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الثالث — تكملة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-review">📖</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة (د3)</div>
+            <div class="task-detail">ديناميكا + مقاومة مواد</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Holiday: Friday 20 - Sunday 22 March -->
+    <div class="day-card holiday-card">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">20-22</div>
+          <div class="day-name-date">
+            <span class="day-name">الجمعة - الأحد</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-holiday">إجازة عيد الفطر</span>
+        </div>
+      </div>
+      <div class="holiday-content">
+        <span class="holiday-emoji">🎉</span>
+        <div class="holiday-text">إجازة عيد الفطر المبارك</div>
+        <div class="holiday-sub">لا توجد مذاكرة — استمتع بالإجازة!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week 3 -->
+  <div class="week-section" data-week="week3">
+    <div class="week-header" style="background:linear-gradient(135deg,#059669,#10b981)">
+      <h2>🗓️ الأسبوع الثالث</h2>
+      <span class="week-badge">23 - 28 مارس</span>
+    </div>
+
+    <!-- Day 13: Monday March 23 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#059669,#10b981)">23</div>
+          <div class="day-name-date">
+            <span class="day-name">الاثنين</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-review">مراجعة ف1</span>
+          <span class="tag tag-programming">برمجة</span>
+          <span class="tag tag-diff">معادلات</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-review">📖</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة الفصل الأول</div>
+            <div class="task-detail">حرارية + ديناميكا + مقاومة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الرابع — نصف</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-diff">📐</div>
+          <div class="task-content">
+            <div class="task-subject">معادلات تفاضلية</div>
+            <div class="task-detail">1.3 ، 2.1 ، 2.2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 14: Tuesday March 24 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#059669,#10b981)">24</div>
+          <div class="day-name-date">
+            <span class="day-name">الثلاثاء</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-programming">برمجة</span>
+          <span class="tag tag-diff">معادلات</span>
+          <span class="tag tag-review">مراجعة ف2</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">برمجة</div>
+            <div class="task-detail">الفصل الرابع — تكملة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-diff">📐</div>
+          <div class="task-content">
+            <div class="task-subject">معادلات تفاضلية</div>
+            <div class="task-detail">2.6</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-review">📖</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة الفصل الثاني</div>
+            <div class="task-detail">حرارية + ديناميكا + مقاومة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 15: Wednesday March 25 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#059669,#10b981)">25</div>
+          <div class="day-name-date">
+            <span class="day-name">الأربعاء</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-review">مراجعة ف3</span>
+          <span class="tag tag-diff">معادلات</span>
+          <span class="tag tag-english">إنجليزي</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-review">📖</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة الفصل الثالث</div>
+            <div class="task-detail">حرارية + ديناميكا + مقاومة</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-diff">📐</div>
+          <div class="task-content">
+            <div class="task-subject">معادلات تفاضلية</div>
+            <div class="task-detail">3.1 ، 3.2</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-english">🌐</div>
+          <div class="task-content">
+            <div class="task-subject">لغة إنجليزية</div>
+            <div class="task-detail">الفصل الأول</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 16: Thursday March 26 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#059669,#10b981)">26</div>
+          <div class="day-name-date">
+            <span class="day-name">الخميس</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-diff">معادلات</span>
+          <span class="tag tag-english">إنجليزي</span>
+          <span class="tag tag-thermal">حرارية</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-diff">📐</div>
+          <div class="task-content">
+            <div class="task-subject">معادلات تفاضلية</div>
+            <div class="task-detail">3.3 ، 3.4</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-english">🌐</div>
+          <div class="task-content">
+            <div class="task-subject">لغة إنجليزية</div>
+            <div class="task-detail">الفصل الثاني</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة أصعب الدروس</div>
+            <div class="task-detail">ديناميكا حرارية</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 17: Friday March 27 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#059669,#10b981)">27</div>
+          <div class="day-name-date">
+            <span class="day-name">الجمعة</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-dynamics">ديناميكا</span>
+          <span class="tag tag-diff">معادلات</span>
+          <span class="tag tag-english">إنجليزي</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-dynamics">🔄</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة أصعب الدروس</div>
+            <div class="task-detail">ديناميكا</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-diff">📐</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة أصعب الدروس</div>
+            <div class="task-detail">معادلات تفاضلية</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-english">🌐</div>
+          <div class="task-content">
+            <div class="task-subject">لغة إنجليزية</div>
+            <div class="task-detail">الفصول 3-4</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 18: Saturday March 28 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#059669,#10b981)">28</div>
+          <div class="day-name-date">
+            <span class="day-name">السبت</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-moqawama">مقاومة مواد</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-moqawama">⚙️</div>
+          <div class="task-content">
+            <div class="task-subject">مقاومة مواد</div>
+            <div class="task-detail">مراجعة فقط</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week 4: Exams -->
+  <div class="week-section" data-week="week4">
+    <div class="week-header" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">
+      <h2>📝 أسبوع الاختبارات</h2>
+      <span class="week-badge">29 مارس - 6 أبريل</span>
+    </div>
+
+    <!-- Day 19: Sunday March 29 - EXAM -->
+    <div class="day-card exam-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">29</div>
+          <div class="day-name-date">
+            <span class="day-name">الأحد</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-exam">📝 اختبار</span>
+          <span class="tag tag-moqawama">مقاومة مواد</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-exam">📝</div>
+          <div class="task-content">
+            <div class="task-subject">اختبار مقاومة مواد</div>
+            <div class="task-time">⏰ 8:30 - 9:30</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-english">🌐</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة</div>
+            <div class="task-detail">لغة إنجليزية</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 20: Monday March 30 - EXAM -->
+    <div class="day-card exam-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">30</div>
+          <div class="day-name-date">
+            <span class="day-name">الاثنين</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-exam">📝 اختبار</span>
+          <span class="tag tag-english">إنجليزي</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-exam">📝</div>
+          <div class="task-content">
+            <div class="task-subject">اختبار لغة إنجليزية</div>
+            <div class="task-time">⏰ 10:30 - 11:30</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-dynamics">🔄</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة</div>
+            <div class="task-detail">ديناميكا</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 21: Tuesday March 31 - EXAM -->
+    <div class="day-card exam-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">31</div>
+          <div class="day-name-date">
+            <span class="day-name">الثلاثاء</span>
+            <span class="day-date">مارس 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-exam">📝 اختبار</span>
+          <span class="tag tag-dynamics">ديناميكا</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-exam">📝</div>
+          <div class="task-content">
+            <div class="task-subject">اختبار ديناميكا</div>
+            <div class="task-time">⏰ 10:30 - 11:30</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-programming">💻</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة</div>
+            <div class="task-detail">برمجة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 22: Wednesday April 1 - EXAM -->
+    <div class="day-card exam-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">1</div>
+          <div class="day-name-date">
+            <span class="day-name">الأربعاء</span>
+            <span class="day-date">أبريل 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-exam">📝 اختبار</span>
+          <span class="tag tag-programming">برمجة</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-exam">📝</div>
+          <div class="task-content">
+            <div class="task-subject">اختبار برمجة</div>
+            <div class="task-time">⏰ 7:30 - 8:30</div>
+          </div>
+        </div>
+        <div class="task-item">
+          <div class="task-icon icon-thermal">🔥</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة</div>
+            <div class="task-detail">ديناميكا حرارية</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 23: Thursday April 2 - EXAM -->
+    <div class="day-card exam-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">2</div>
+          <div class="day-name-date">
+            <span class="day-name">الخميس</span>
+            <span class="day-date">أبريل 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-exam">📝 اختبار</span>
+          <span class="tag tag-thermal">ثيرمو</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-exam">📝</div>
+          <div class="task-content">
+            <div class="task-subject">اختبار ثيرمو</div>
+            <div class="task-time">⏰ 3:00 - 4:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Days 24-26: Friday April 3 - Sunday April 5 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">3-5</div>
+          <div class="day-name-date">
+            <span class="day-name">الجمعة - الأحد</span>
+            <span class="day-date">أبريل 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-diff">معادلات تفاضلية</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-diff">📐</div>
+          <div class="task-content">
+            <div class="task-subject">مراجعة معادلات تفاضلية</div>
+            <div class="task-detail">مراجعة شاملة لجميع الفصول</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 27: Monday April 6 - EXAM -->
+    <div class="day-card exam-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-info">
+          <div class="day-number">6</div>
+          <div class="day-name-date">
+            <span class="day-name">الاثنين</span>
+            <span class="day-date">أبريل 2025</span>
+          </div>
+        </div>
+        <div class="day-tags">
+          <span class="tag tag-exam">📝 اختبار</span>
+          <span class="tag tag-diff">معادلات</span>
+        </div>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="day-tasks">
+        <div class="task-divider"></div>
+        <div class="task-item">
+          <div class="task-icon icon-exam">📝</div>
+          <div class="task-content">
+            <div class="task-subject">اختبار معادلات تفاضلية</div>
+            <div class="task-time">⏰ 10:30 - 11:30</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Glossary -->
+  <div class="legend">
+    <h3>📖 شرح المصطلحات</h3>
+    <div class="legend-grid">
+      <div class="legend-item"><span style="font-weight:700;color:#1d4ed8">نصف (Half)</span> — مذاكرة نصف الأسئلة</div>
+      <div class="legend-item"><span style="font-weight:700;color:#059669">تكملة (Rest)</span> — تكملة باقي الأسئلة</div>
+      <div class="legend-item"><span style="font-weight:700;color:#7c3aed">نظري (Theory)</span> — مذاكرة النظري للدرس</div>
+      <div class="legend-item"><span style="font-weight:700;color:#dc2626">أصعب الدروس (Hard)</span> — أصعب الدروس للمادة</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>جدول مذاكرة اختبارات الميد — معدّل بتاريخ مارس 2025</p>
+    <p style="margin-top:6px">بداية الجدول: الأحد 8 مارس | إجازة عيد الفطر: 20-22 مارس</p>
+  </div>
+</div>
+
+<script>
+  const completedDaysStorageKey = 'completedDays';
+
+  function saveCompletedDays(completedSet) {
+    localStorage.setItem(completedDaysStorageKey, JSON.stringify(Array.from(completedSet)));
+  }
+
+  function getCompletedDays() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(completedDaysStorageKey) || '[]');
+      return new Set(Array.isArray(parsed) ? parsed : []);
+    } catch (error) {
+      return new Set();
+    }
+  }
+
+  function initializeChecklist() {
+    const completedDays = getCompletedDays();
+    document.querySelectorAll('.day-card').forEach((card, index) => {
+      const dayId = card.dataset.dayId || `day-${index + 1}`;
+      card.dataset.dayId = dayId;
+      card.classList.toggle('completed', completedDays.has(dayId));
+
+      card.addEventListener('dblclick', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (completedDays.has(dayId)) {
+          completedDays.delete(dayId);
+        } else {
+          completedDays.add(dayId);
+        }
+        card.classList.toggle('completed', completedDays.has(dayId));
+        saveCompletedDays(completedDays);
+      });
+    });
+  }
+
+  function toggleDarkMode() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+    const btn = document.querySelector('.dark-mode-toggle');
+    // تغيير الأيقونة بناءً على الوضع الحالي
+    btn.textContent = isDarkMode ? '☀️' : '🌙';
+  }
+
+  // التأكد من تشغيل الوضع الليلي عند تحميل الصفحة إذا كان مفعلاً سابقاً
+  window.addEventListener('DOMContentLoaded', () => {
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      const btn = document.querySelector('.dark-mode-toggle');
+      if(btn) btn.textContent = '☀️';
+    }
+    initializeChecklist();
+
+    // إخفاء الشاشة
+    setTimeout(() => {
+      const splash = document.getElementById('splash-screen');
+      if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => splash.remove(), 500);
+      }
+    }, 1500);
+  });
+
+  function toggleDay(card) {
+    if (card.classList.contains('holiday-card')) return;
+    card.classList.toggle('expanded');
+    const tasks = card.querySelector('.day-tasks');
+    if (tasks) tasks.classList.toggle('open');
+  }
+
+  function filterWeek(week, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.week-section').forEach(section => {
+      if (week === 'all') {
+        section.style.display = 'block';
+      } else {
+        section.style.display = section.dataset.week === week ? 'block' : 'none';
+      }
+    });
+  }
+
+  // Animate progress bars on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.progress-fill').forEach(bar => {
+        const width = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => { bar.style.width = width; }, 100);
+      });
+    }, 300);
+  });
+</script>
+</body>
+</html>
